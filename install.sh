@@ -36,9 +36,9 @@ https_proxy=${https_proxy:-$HTTPS_PROXY}
 HTTPS_PROXY=${HTTPS_PROXY:-$https_proxy}
 
 if [ "$JABBA_GET" == "" ]; then
-    if [ 0 -eq  $(has_command curl) ]; then
+    if [ 0 -eq "$(has_command curl)" ]; then
         JABBA_GET="curl -sL"
-    elif [ 0 -eq $(has_command wget) ]; then
+    elif [ 0 -eq "$(has_command wget)" ]; then
         JABBA_GET="wget -qO-"
     else
         echo "[ERROR] This script needs wget or curl to be installed."
@@ -179,10 +179,10 @@ if [ ! "$SKIP_RC" ]; then
 
     for file in "${files[@]}"
     do
-        touch ${file}
+        touch "${file}"
         if ! grep -qc '/jabba.sh' "${file}"; then
             echo "Adding source string to ${file}"
-            printf "$SOURCE_JABBA\n" >> "${file}"
+            printf "%s\n" "$SOURCE_JABBA" >> "${file}"
         else
             echo "Skipped update of ${file} (source string already present)"
         fi
@@ -190,10 +190,10 @@ if [ ! "$SKIP_RC" ]; then
 
     if [ -f "$(which zsh 2>/dev/null)" ]; then
         file="$HOME/.zshrc"
-        touch ${file}
+        touch "${file}"
         if ! grep -qc '/jabba.sh' "${file}"; then
             echo "Adding source string to ${file}"
-            printf "$SOURCE_JABBA\n" >> "${file}"
+            printf "%s\n" "$SOURCE_JABBA" >> "${file}"
         else
             echo "Skipped update of ${file} (source string already present)"
         fi
@@ -222,11 +222,11 @@ FISH_SOURCE_JABBA="\n[ -s \"$JABBA_HOME/jabba.fish\" ]; and source \"$JABBA_HOME
 
 if [ -f "$(which fish 2>/dev/null)" ]; then
     file="$HOME/.config/fish/config.fish"
-    mkdir -p $(dirname ${file})
-    touch ${file}
+    mkdir -p "$(dirname "${file}")"
+    touch "${file}"
     if ! grep -qc '/jabba.fish' "${file}"; then
         echo "Adding source string to ${file}"
-        printf "$FISH_SOURCE_JABBA\n" >> "${file}"
+        printf "%s\n" "$FISH_SOURCE_JABBA" >> "${file}"
     else
         echo "Skipped update of ${file} (source string already present)"
     fi
