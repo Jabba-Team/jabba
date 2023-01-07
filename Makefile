@@ -35,7 +35,7 @@ build-release:
 	-output="release/{{.Dir}}-${VERSION}-{{.OS}}-{{.Arch}}" .
 
 install: build
-	JABBA_MAKE_INSTALL=true JABBA_VERSION=${VERSION} sh install.sh
+	JABBA_MAKE_INSTALL=true JABBA_VERSION=${VERSION} bash install.sh
 
 publish: clean build-release
 	test -n "$(GITHUB_TOKEN)" # $$GITHUB_TOKEN must be set
