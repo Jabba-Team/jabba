@@ -9,6 +9,11 @@ jabba() {
     (JABBA_SHELL_INTEGRATION=ON "$JABBA_BIN_TO_EXPORT/jabba" "$@" --fd3 "${fd3}")
     local exit_code=$?
     eval "$(cat "${fd3}")"
+    case "$OSTYPE" in
+        cygwin*|msys*)
+            export PATH="$(/usr/bin/cygpath -p "${PATH}")"
+        ;;
+    esac
     command rm -f "${fd3}"
     return ${exit_code}
 }
