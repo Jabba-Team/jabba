@@ -136,8 +136,12 @@ mkdir -p "${JABBA_BIN}"
 
 if [ "$JABBA_MAKE_INSTALL" == "true" ]; then
     cp jabba "${JABBA_BIN}"
+    JABBA_SH="$(cat jabba.sh)"
+    JABBA_FISH="$(cat jabba.fish)"
 else
     $JABBA_GET "${BINARY_URL}" > "${JABBA_BIN}/jabba" && chmod a+x "${JABBA_BIN}/jabba"
+    JABBA_SH="$(${JABBA_GET} "https://github.com/Jabba-Team/jabba/raw/${JABBA_VERSION}/jabba.sh")"
+    JABBA_FISH="$(${JABBA_GET} "https://github.com/Jabba-Team/jabba/raw/${JABBA_VERSION}/jabba.fish")"
 fi
 
 if ! "${JABBA_BIN}/jabba" --version &>/dev/null; then
@@ -157,9 +161,9 @@ if [ "$JABBA_COMMAND" != "" ]; then
     fi
 fi
 
-sed -e "s=\$JABBA_HOME_TO_EXPORT=$JABBA_HOME_TO_EXPORT=g" -e "s=\$JABBA_BIN_TO_EXPORT=$JABBA_BIN_TO_EXPORT=g" jabba.sh > "${JABBA_SHARE}/jabba.sh"
+echo "$JABBA_SH" | sed -e "s=\$JABBA_HOME_TO_EXPORT=$JABBA_HOME_TO_EXPORT=g" -e "s=\$JABBA_BIN_TO_EXPORT=$JABBA_BIN_TO_EXPORT=g" > "${JABBA_SHARE}/jabba.sh"
 
-SOURCE_JABBA="\n[ -s \"$JABBA_SHARE/jabba.sh\" ] && source \"$JABBA_SHARE/jabba.sh\""
+SOURCE_JABBA="[ -s \"$JABBA_SHARE/jabba.sh\" ] && source \"$JABBA_SHARE/jabba.sh\""
 
 if [ ! "$SKIP_RC" ]; then
     files=("$HOME/.bashrc")
@@ -179,7 +183,7 @@ if [ ! "$SKIP_RC" ]; then
         touch "${file}"
         if ! grep -qc '/jabba.sh' "${file}"; then
             echo "Adding source string to ${file}"
-            printf "%s\n" "$SOURCE_JABBA" >> "${file}"
+            printf "\n%s\n" "$SOURCE_JABBA" >> "${file}"
         else
             echo "Skipped update of ${file} (source string already present)"
         fi
@@ -190,16 +194,16 @@ if [ ! "$SKIP_RC" ]; then
         touch "${file}"
         if ! grep -qc '/jabba.sh' "${file}"; then
             echo "Adding source string to ${file}"
-            printf "%s\n" "$SOURCE_JABBA" >> "${file}"
+            printf "\n%s\n" "$SOURCE_JABBA" >> "${file}"
         else
             echo "Skipped update of ${file} (source string already present)"
         fi
     fi
 fi
 
-sed -e "s=\$JABBA_HOME_TO_EXPORT=$JABBA_HOME_TO_EXPORT=g" -e "s=\$JABBA_BIN_TO_EXPORT=$JABBA_BIN_TO_EXPORT=g" jabba.fish > "${JABBA_SHARE}/jabba.fish"
+echo "$JABBA_FISH" | sed -e "s=\$JABBA_HOME_TO_EXPORT=$JABBA_HOME_TO_EXPORT=g" -e "s=\$JABBA_BIN_TO_EXPORT=$JABBA_BIN_TO_EXPORT=g" > "${JABBA_SHARE}/jabba.fish"
 
-FISH_SOURCE_JABBA="\n[ -s \"$JABBA_SHARE/jabba.fish\" ]; and source \"$JABBA_SHARE/jabba.fish\""
+FISH_SOURCE_JABBA="[ -s \"$JABBA_SHARE/jabba.fish\" ]; and source \"$JABBA_SHARE/jabba.fish\""
 
 if [ -f "$(which fish 2>/dev/null)" ]; then
     file="$HOME/.config/fish/config.fish"
@@ -207,7 +211,7 @@ if [ -f "$(which fish 2>/dev/null)" ]; then
     touch "${file}"
     if ! grep -qc '/jabba.fish' "${file}"; then
         echo "Adding source string to ${file}"
-        printf "%s\n" "$FISH_SOURCE_JABBA" >> "${file}"
+        printf "\n%s\n" "$FISH_SOURCE_JABBA" >> "${file}"
     else
         echo "Skipped update of ${file} (source string already present)"
     fi
