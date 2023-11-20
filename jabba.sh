@@ -6,7 +6,7 @@ export JABBA_HOME="$JABBA_HOME_TO_EXPORT"
 jabba() {
     local fd3
     fd3=$(mktemp /tmp/jabba-fd3.XXXXXX)
-    (JABBA_SHELL_INTEGRATION=ON "$JABBA_BIN_TO_EXPORT/jabba" "$@" 3>| "${fd3}")
+    (JABBA_SHELL_INTEGRATION=ON "$JABBA_BIN_TO_EXPORT/jabba" "$@" --fd3 "${fd3}")
     local exit_code=$?
     eval "$(cat "${fd3}")"
     command rm -f "${fd3}"
