@@ -26,10 +26,10 @@ test-coverage:
 	rm *.coverprofile
 
 build:
-	go build -ldflags "-s -w -X main.version=${VERSION}"
+	CGO_ENABLED=0 go build -ldflags "-s -w -X main.version=${VERSION}"
 
 build-release:
-	gox -verbose \
+	CGO_ENABLED=0 gox -verbose \
 	-ldflags "-X main.version=${VERSION}" \
 	-osarch="windows/386 windows/amd64 linux/386 linux/amd64 darwin/amd64 darwin/arm64 linux/arm linux/arm64" \
 	-output="release/{{.Dir}}-${VERSION}-{{.OS}}-{{.Arch}}" .
