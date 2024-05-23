@@ -19,8 +19,9 @@ Enjoy the wrapper :)
 https://raw.githubusercontent.com/nicerloop/jabba-wrapper/main/jabbaw
 
 ```sh
-curl -sLO https://raw.githubusercontent.com/Jabba-Team/jabba/blob/main/jabbaw && chmod +x jabbaw
-curl -sLO https://raw.githubusercontent.com/Jabba-Team/jabba/blob/main/jabbaw.ps1
+curl -sLO https://raw.githubusercontent.com/Jabba-Team/jabba/main/jabbaw
+chmod +x jabbaw
+curl -sLO https://raw.githubusercontent.com/Jabba-Team/jabba/main/jabbaw.ps1
 echo "zulu@8" > .jabbarc
 ./jabbaw ./mvnw -v
 ```
@@ -29,8 +30,10 @@ echo "zulu@8" > .jabbarc
 
 ```powershell
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/Jabba-Team/jabba/blob/main/jabbaw.ps1 -OutFile ./jabbaw.ps1
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/Jabba-Team/jabba/blob/main/jabbaw -OutFile ./jabbaw
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/Jabba-Team/jabba/main/jabbaw.ps1 -OutFile ./jabbaw.ps1
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/Jabba-Team/jabba/main/jabbaw -OutFile ./jabbaw
+# don't forget to set executable bit for shell script in git
+# git update-index --chmod=+x jabbaw
 "zulu@8" | Out-File .jabbarc
 ./jabbaw ./mvnw -v
 ```
