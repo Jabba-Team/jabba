@@ -242,7 +242,7 @@ if [ -f "$(which fish 2>/dev/null)" ]; then
     touch "${file}"
     if ! grep -qc '/jabba.fish' "${file}"; then
         echo "Adding source string to ${file}"
-        printf "%s\n" "$FISH_SOURCE_JABBA" >> "${file}"
+        echo -e "$FISH_SOURCE_JABBA" >>"$file"
     else
         echo "Skipped update of ${file} (source string already present)"
     fi
