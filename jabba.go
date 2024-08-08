@@ -157,6 +157,24 @@ func main() {
 			return nil
 		},
 	}
+	lsAliasCmd := &cobra.Command{
+		Use:   "ls-alias",
+		Short: "List configured aliases",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			aliases, err := command.LsAlias()
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			index := 1
+			for name, content := range aliases {
+				fmt.Printf("%d. Alias Name: %s Content: %s\n", index, name, content)
+				index += 1
+			}
+
+			return nil
+		},
+	}
 	lsRemoteCmd := &cobra.Command{
 		Use:   "ls-remote",
 		Short: "List remote versions available for install",
@@ -290,6 +308,7 @@ func main() {
 		},
 		lsCmd,
 		lsRemoteCmd,
+		lsAliasCmd,
 		&cobra.Command{
 			Use:   "deactivate",
 			Short: "Undo effects of `jabba` on current shell",
