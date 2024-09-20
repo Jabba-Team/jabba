@@ -41,6 +41,18 @@ See [jabba-wrapper](jabbaw.md)
 brew install jabba
 ```
 
+Add the following to your .zshrc
+
+```sh
+  [ -s "$HOMEBREW_PREFIX/opt/jabba/jabba.sh" ] && . "$HOMEBREW_PREFIX/opt/jabba/jabba.sh"
+```
+If `HOMEBREW_PREFIX` isn't already defined for you run:
+
+```sh
+  brew --prefix
+```
+to get the value
+
 #### macOS / Linux
 
 > (in bash/zsh/...)
@@ -113,6 +125,10 @@ Invoke-Expression (
 ```
 
 > Use the same command to upgrade, you can also upgrade from shyiko's 0.11.2 by running this command
+
+> Scoop
+
+Whilst jabba is listed in the Scoop package manager, scoop only install the binary, it doesn't add the shell integration, it is recommended you install from the script above or try adding the shell integration manually while we investigate the proper fix, see the (issue here)[https://github.com/Jabba-Team/jabba/issues/48] for details. 
 
 ## Usage
 
