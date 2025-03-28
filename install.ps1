@@ -78,6 +78,45 @@ else
     Write-Host "Skipped update of $profile (source string already present)"
 }
 
+@"
+# https://github.com/Jabba-Team/jabba
+# This file is intended to be "sourced" (i.e. "source ~/.jabba/jabba.nu")
+
+def --env jabba [...params:string] {
+    `$env.JABBA_HOME = '$jabbaHome'
+	let `$jabbaExe = '$jabbaHome/bin/jabba' | str replace --all '\' '/'
+    let fd3 = mktemp -t jabba-fd3.XXXXXX.env
+    nu -c `$"\`$env.JABBA_SHELL_INTEGRATION = 'ON'
+      (`$jabbaExe) ...(`$params) --fd3 (`$fd3)"
+    let exit_code = `$env.LAST_EXIT_CODE
+    if ( ls `$fd3 | where size > 0B | is-not-empty ) {
+       (
+            cat `$fd3
+            | str trim
+            | lines
+            | parse 'export {name}="{value}"'
+            | transpose --header-row --as-record)| load-env
+    }
+    if `$exit_code != 0 {
+        return `$exit_code
+    }
+}
+"@  | Out-String | New-Item -Force $jabbaHome/jabba.nu
+# the above Out-String | New-Item lets us avoid the BOM in  powershell 5.1. nushell chokes on the BOM
+$sourceNushell="source `'$jabbaHome\jabba.nu`'"
+$nuConfig="$Env:APPDATA\nushell\config.nu"
+
+if ($(Test-Path $nuConfig)){
+	if("$(Get-Content $nuConfig | Select-String "\\jabba.nu")" -eq "")
+	{
+		Write-Host "Adding source string to $nuConfig"
+		"`n$sourceNushell`n" | Out-File -Append -Encoding ASCII $nuconfig
+	}
+	else
+	{
+		Write-Host "Skipped update of $nuConfig (source string already present)"
+	}
+}
 . $jabbaHome\jabba.ps1
 
 Write-Host @"
