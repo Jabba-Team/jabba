@@ -6,7 +6,8 @@ JABBA_VERSION=${JABBA_VERSION:-latest}
 
 if [ "$JABBA_HOME" == "" ] || [ "$JABBA_HOME" == "$HOME/.jabba" ]; then
     JABBA_HOME=$HOME/.jabba
-    JABBA_HOME_TO_EXPORT=\$HOME/.jabba
+    JABBA_HOME_TO_EXPORT=\${HOME}/.jabba
+    JABBA_HOME_TO_EXPORT_NUSHELL='~/.jabba'
 else
     JABBA_HOME_TO_EXPORT=$JABBA_HOME
 fi
@@ -252,15 +253,15 @@ echo "# https://github.com/Jabba-Team/jabba"
 echo "# This file is intended to be \"sourced\" (i.e. \"source ~/.jabba/jabba.nu\")"
 echo ""
 echo "def --env jabba [...params:string] {"
-echo "    \$env.JABBA_HOME = $JABBA_HOME_TO_EXPORT"
+echo "    \$env.JABBA_HOME = ('$JABBA_HOME_TO_EXPORT_NUSHELL' | path expand)" 
 echo "    let fd3 = mktemp -t jabba-fd3.XXXXXX.env"
 echo "    nu -c \$\"\\\$env.JABBA_SHELL_INTEGRATION = 'ON'"
-echo "      $JABBA_HOME_TO_EXPORT/bin/jabba ...(\$params) --fd3 (\$fd3)\""
+echo "      $JABBA_HOME_TO_EXPORT_NUSHELL/bin/jabba ...(\$params) --fd3 (\$fd3)\""
 echo "    let exit_code = \$env.LAST_EXIT_CODE"
 echo "    if ( ls \$fd3 | where size > 0B | is-not-empty ) {"
 echo ""
 echo "       ("
-echo "            cat \$fd3"
+echo "            open \$fd3"
 echo "            | str trim"
 echo "            | lines"
 echo "            | parse 'export {name}=\"{value}\"'"

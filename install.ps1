@@ -84,14 +84,14 @@ else
 
 def --env jabba [...params:string] {
     `$env.JABBA_HOME = '$jabbaHome'
-	let `$jabbaExe = '$jabbaHome/bin/jabba' | str replace --all '\' '/'
+    let `$jabbaExe = '$jabbaHome/bin/jabba' | str replace --all '\' '/'
     let fd3 = mktemp -t jabba-fd3.XXXXXX.env
     nu -c `$"\`$env.JABBA_SHELL_INTEGRATION = 'ON'
       (`$jabbaExe) ...(`$params) --fd3 (`$fd3)"
     let exit_code = `$env.LAST_EXIT_CODE
     if ( ls `$fd3 | where size > 0B | is-not-empty ) {
        (
-            cat `$fd3
+            open `$fd3
             | str trim
             | lines
             | parse 'export {name}="{value}"'
