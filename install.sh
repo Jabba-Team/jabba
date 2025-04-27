@@ -6,7 +6,8 @@ JABBA_VERSION=${JABBA_VERSION:-latest}
 
 if [ "$JABBA_HOME" == "" ] || [ "$JABBA_HOME" == "$HOME/.jabba" ]; then
     JABBA_HOME=$HOME/.jabba
-    JABBA_HOME_TO_EXPORT=\$HOME/.jabba
+    JABBA_HOME_TO_EXPORT=\${HOME}/.jabba
+    JABBA_HOME_TO_EXPORT_NUSHELL='~/.jabba'
 else
     JABBA_HOME_TO_EXPORT=$JABBA_HOME
 fi
@@ -243,6 +244,45 @@ if [ -f "$(which fish 2>/dev/null)" ]; then
     if ! grep -qc '/jabba.fish' "${file}"; then
         echo "Adding source string to ${file}"
         echo -e "$FISH_SOURCE_JABBA" >>"$file"
+    else
+        echo "Skipped update of ${file} (source string already present)"
+    fi
+fi
+{
+echo "# https://github.com/Jabba-Team/jabba"
+echo "# This file is intended to be \"sourced\" (i.e. \"source ~/.jabba/jabba.nu\")"
+echo ""
+echo "def --env jabba [...params:string] {"
+echo "    \$env.JABBA_HOME = ('$JABBA_HOME_TO_EXPORT_NUSHELL' | path expand)" 
+echo "    let fd3 = mktemp -t jabba-fd3.XXXXXX.env"
+echo "    nu -c \$\"\\\$env.JABBA_SHELL_INTEGRATION = 'ON'"
+echo "      $JABBA_HOME_TO_EXPORT_NUSHELL/bin/jabba ...(\$params) --fd3 (\$fd3)\""
+echo "    let exit_code = \$env.LAST_EXIT_CODE"
+echo "    if ( ls \$fd3 | where size > 0B | is-not-empty ) {"
+echo ""
+echo "       ("
+echo "            open \$fd3"
+echo "            | str trim"
+echo "            | lines"
+echo "            | parse 'export {name}=\"{value}\"'"
+echo "            | transpose --header-row --as-record)| load-env"
+echo "    }"
+echo "    if \$exit_code != 0 {"
+echo "        return \$exit_code"
+echo "    }"
+echo "}"
+} > "${JABBA_HOME}/jabba.nu"
+
+#nushell doesn't support sourcing files only if they exist
+NUSHELL_SOURCE_JABBA="\nsource \"$JABBA_SHARE/jabba.nu\""
+
+if [ -f "$(which nu 2>/dev/null)" ]; then
+    file="$HOME/.config/nushell/config.nu"
+    mkdir -p "$(dirname "${file}")"
+    touch "${file}"
+    if ! grep -qc '/jabba.nu' "${file}"; then
+        echo "Adding source string to ${file}"
+        echo -e "$NUSHELL_SOURCE_JABBA" >>"$file"
     else
         echo "Skipped update of ${file} (source string already present)"
     fi
