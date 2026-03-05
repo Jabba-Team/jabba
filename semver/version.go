@@ -20,6 +20,7 @@ func (l *Version) LessThan(r *Version) bool {
 }
 
 func (l *Version) Equals(r *Version) bool {
+	//test
 	return l.raw == r.raw
 }
 
