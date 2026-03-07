@@ -113,9 +113,9 @@ $ docker run -it --rm <image_name>:<image_tag> java -version
 java version "1.15.0....
 ```
 
-#### Windows 10
+#### Windows
 
-> (in powershell)
+##### PowerShell
 
 ```powershell
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -124,11 +124,40 @@ Invoke-Expression (
 ).Content
 ```
 
-> Use the same command to upgrade, you can also upgrade from shyiko's 0.11.2 by running this command
+The installer will:
 
-> Scoop
+- Download and install `jabba.exe`
+- Create shell integration for PowerShell (`jabba.ps1`)
+- Create shell integration for Git Bash/Cygwin/MSYS (`jabba.sh`)
+- Update your PowerShell profile to source `jabba.ps1`
 
-Whilst jabba is listed in the Scoop package manager, scoop only install the binary, it doesn't add the shell integration, it is recommended you install from the script above or try adding the shell integration manually while we investigate the proper fix, see the (issue here)[https://github.com/Jabba-Team/jabba/issues/48] for details. 
+##### Git Bash / Cygwin / MSYS
+
+The PowerShell installer (above) creates `~/.jabba/jabba.sh` for bash users. Add this to your `~/.bashrc`:
+
+```bash
+[ -s "$HOME/.jabba/jabba.sh" ] && source "$HOME/.jabba/jabba.sh"
+```
+
+Or you can install using the Unix/Linux installation method which also works in Git Bash:
+
+```sh
+export JABBA_VERSION=...
+curl -sL https://github.com/Jabba-Team/jabba/raw/main/install.sh | bash && . ~/.jabba/jabba.sh
+```
+
+> **Note**: Use the same command to upgrade, you can also upgrade from shyiko's 0.11.2 by running this command
+
+##### Package Managers
+
+> **WinGet / Scoop**
+
+Whilst jabba is available through WinGet and Scoop package managers, these only install the binary without adding shell integration. It is recommended you install from the script above. If you've already installed via a package manager, you can add the shell integration manually:
+
+- For PowerShell: Source `~/.jabba/jabba.ps1` in your `$PROFILE`
+- For Git Bash: Source `~/.jabba/jabba.sh` in your `~/.bashrc`
+
+See [issue #48](https://github.com/Jabba-Team/jabba/issues/48) for details.
 
 ## Usage
 
@@ -256,6 +285,94 @@ sudo update-alternatives --install /usr/bin/javac javac ${JAVA_HOME%*/}/bin/java
 ```
 
 > To switch between multiple GLOBAL alternatives use `sudo update-alternatives --config java`.
+
+## Troubleshooting
+
+### Windows Issues
+
+**`jabba use` doesn't set JAVA_HOME or update PATH**
+
+Check which shell you're using and verify the integration is loaded:
+
+**PowerShell:**
+
+1. Check if the function is loaded:
+
+   ```powershell
+   Get-Command jabba | Select-Object CommandType
+   # Should show "Function", not "Application"
+   ```
+
+2. If it shows "Application", the integration isn't loaded. Check your profile:
+
+   ```powershell
+   Get-Content $PROFILE | Select-String "jabba"
+   ```
+
+3. The profile should contain (uncommented):
+
+   ```powershell
+   if (Test-Path "C:\Users\<YourUsername>\.jabba\jabba.ps1") { . "C:\Users\<YourUsername>\.jabba\jabba.ps1" }
+   ```
+
+4. If it's commented out (starts with `#`) or missing, add it:
+
+   ```powershell
+   notepad $PROFILE
+   # Add the line above (uncommented), save, then reload:
+   . $PROFILE
+   ```
+
+**Git Bash / Cygwin / MSYS:**
+
+1. Check if the function is loaded:
+
+   ```bash
+   type jabba
+   # Should show "jabba is a function"
+   ```
+
+2. If it shows "jabba is /path/to/jabba.exe", the integration isn't loaded. Check your `~/.bashrc`:
+
+   ```bash
+   grep jabba ~/.bashrc
+   ```
+
+3. Add this line to `~/.bashrc` if missing:
+
+   ```bash
+   [ -s "$HOME/.jabba/jabba.sh" ] && source "$HOME/.jabba/jabba.sh"
+   ```
+
+4. Reload your shell:
+
+   ```bash
+   source ~/.bashrc
+   ```
+
+**`jabba current` returns nothing**
+
+This means `JAVA_HOME` isn't set by jabba. Follow the steps above to ensure shell integration is loaded.
+
+#### Installed via WinGet or Scoop
+
+Package managers install the binary but don't configure shell integration. After installing via WinGet/Scoop:
+
+1. The `jabba.ps1` and `jabba.sh` files should be at `~/.jabba/`
+2. Manually add the source line to your shell profile (see instructions above)
+3. Reload your shell
+
+#### Upgrading from an older version
+
+If you upgraded and things stopped working, the shell integration may need updating:
+
+```powershell
+# PowerShell: Reinstall to regenerate integration files
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+Invoke-Expression (
+  Invoke-WebRequest https://github.com/Jabba-Team/jabba/raw/main/install.ps1 -UseBasicParsing
+).Content
+```
 
 ## License
 

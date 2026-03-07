@@ -1,6 +1,22 @@
 # Changelog
-All notable changes to this project will be documented in this file.  
+All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
+
+## [UNRELEASED]
+
+### Fixed
+- Windows PATH separator bug preventing `jabba use` from working correctly on Windows ([#XXX](https://github.com/Jabba-Team/jabba/issues/XXX))
+  - Changed hardcoded `:` separator to use `os.PathListSeparator` (`;` on Windows, `:` on Unix/Linux/macOS)
+  - Fixed regex to handle paths at the end of PATH without trailing separator
+  - Added cleanup for trailing separators in final PATH
+
+### Added
+- Git Bash/Cygwin/MSYS support on Windows
+  - `install.ps1` now generates `jabba.sh` for bash users on Windows
+  - `install.sh` generates cross-platform `jabba.sh` that works on both Windows and Unix systems
+  - Automatic OS detection and path conversion for Windows environments
+- Windows-specific tests (`use_windows_test.go`)
+- Updated documentation for Windows Git Bash installation and usage
 
 ## [UNRELEASED] - 2021-11-20
 

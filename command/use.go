@@ -27,9 +27,13 @@ func usePath(path string) ([]string, error) {
 		return nil, err
 	}
 	pth, _ := os.LookupEnv("PATH")
-	rgxp := regexp.MustCompile(regexp.QuoteMeta(filepath.Join(cfg.Dir(), "jdk")) + "[^:]+[:]")
+	pathSep := regexp.QuoteMeta(string(os.PathListSeparator))
+	// Match jabba paths with optional trailing separator (for paths at end of PATH)
+	rgxp := regexp.MustCompile(regexp.QuoteMeta(filepath.Join(cfg.Dir(), "jdk")) + "[^" + pathSep + "]+" + "[" + pathSep + "]?")
 	// strip references to ~/.jabba/jdk/*, otherwise leave unchanged
 	pth = rgxp.ReplaceAllString(pth, "")
+	// Clean up any trailing path separator
+	pth = regexp.MustCompile(pathSep+"$").ReplaceAllString(pth, "")
 	if runtime.GOOS == "darwin" {
 		path = filepath.Join(path, "Contents", "Home")
 	}
@@ -37,8 +41,11 @@ func usePath(path string) ([]string, error) {
 	if !overrideWasSet {
 		systemJavaHome, _ = os.LookupEnv("JAVA_HOME")
 	}
+	newPath := filepath.Join(path, "bin") + string(os.PathListSeparator) + pth
+	// Clean up any trailing path separator from final result
+	newPath = regexp.MustCompile(pathSep+"$").ReplaceAllString(newPath, "")
 	return []string{
-		"export PATH=\"" + filepath.Join(path, "bin") + string(os.PathListSeparator) + pth + "\"",
+		"export PATH=\"" + newPath + "\"",
 		"export JAVA_HOME=\"" + path + "\"",
 		"export JAVA_HOME_BEFORE_JABBA=\"" + systemJavaHome + "\"",
 	}, nil

@@ -20,6 +20,9 @@ func (f FileInfoMock) IsDir() bool        { return true }
 func (f FileInfoMock) Sys() interface{}   { return nil }
 
 func TestUse(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("Skipping Unix-specific test on Windows")
+	}
 	prevPath := os.Getenv("PATH")
 	defer func() { os.Setenv("PATH", prevPath) }()
 	var prevReadDir = readDir

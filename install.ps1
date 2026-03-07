@@ -61,6 +61,47 @@ function jabba
 }
 "@ | Out-File $jabbaHome/jabba.ps1
 
+# Create jabba.sh for Git Bash / Cygwin / MSYS users on Windows
+@"
+# https://github.com/Jabba-Team/jabba
+# This file is intended to be "sourced" (i.e. ". ~/.jabba/jabba.sh")
+
+export JABBA_HOME="`$HOME/.jabba"
+
+jabba() {
+    local fd3=`$(mktemp /tmp/jabba-fd3.XXXXXX)
+
+    # Detect if we're on Windows (Git Bash/MSYS/Cygwin) or Unix/Linux/macOS
+    case "`$OSTYPE" in
+        msys*|cygwin*|win32)
+            # Windows: use .exe extension and --fd3 flag (fd redirection doesn't work)
+            JABBA_SHELL_INTEGRATION=ON "`$JABBA_HOME/bin/jabba.exe" "`$@" --fd3 "`$fd3"
+            local exit_code=`$?
+            if [ -s "`$fd3" ]; then
+                # Convert Windows paths to Unix-style for Git Bash
+                # 1. Replace backslashes with forward slashes
+                # 2. Convert C:/ to /c/ (drive letters)
+                # 3. Replace semicolons with colons (PATH separator)
+                eval `$(cat "`$fd3" | sed 's#\\#/#g' | sed 's#\([A-Za-z]\):/#/\L\1/#g' | sed 's#;#:#g')
+            fi
+            ;;
+        *)
+            # Unix/Linux/macOS: use fd redirection (standard approach)
+            (JABBA_SHELL_INTEGRATION=ON `$JABBA_HOME/bin/jabba "`$@" 3>| `${fd3})
+            local exit_code=`$?
+            eval `$(cat `${fd3})
+            ;;
+    esac
+
+    rm -f `${fd3}
+    return `${exit_code}
+}
+
+if [ ! -z "`$(jabba alias default)" ]; then
+    jabba use default
+fi
+"@ | Out-File $jabbaHome/jabba.sh -Encoding ASCII
+
 $sourceJabba="if (Test-Path `"$jabbaHome\jabba.ps1`") { . `"$jabbaHome\jabba.ps1`" }"
 
 if (-not $(Test-Path $profile))
