@@ -3,10 +3,13 @@ package command
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"strings"
+
+	_os "os"
 
 	"github.com/Jabba-Team/jabba/cfg"
 	"github.com/Jabba-Team/jabba/semver"
@@ -16,8 +19,16 @@ type byOS map[string]byArch
 type byArch map[string]byDistribution
 type byDistribution map[string]map[string]string
 
+var localCachePath = cfg.Dir() + "/index.json"
+
 func LsRemote(os, arch string) (map[*semver.Version]string, error) {
-	cnt, err := fetch(cfg.Index())
+	// try read $JABBA_HOME/index.json first
+	var cnt, err = _os.ReadFile(localCachePath);
+	if err != nil{
+		cnt, err = fetch(cfg.Index())
+	} else {
+		fmt.Printf("use local cache index: %s need refresh, delete it\n", localCachePath)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -60,5 +71,6 @@ func fetch(url string) (content []byte, err error) {
 	if err != nil {
 		return
 	}
+	_os.WriteFile(localCachePath, content, 0644)
 	return
 }
