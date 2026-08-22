@@ -50,8 +50,8 @@ if the problem persists - please create a ticket at https://github.com/Jabba-Tea
 function jabba
 {
     `$fd3=`$([System.IO.Path]::GetTempFileName())
-    `$command="& '$jabbaHome\bin\jabba.exe' `$args --fd3 ```"`$fd3```""
-    & { `$env:JABBA_SHELL_INTEGRATION="ON"; Invoke-Expression `$command }
+    `$cmdArgs=`$args
+    & { `$env:JABBA_SHELL_INTEGRATION="ON"; & '$jabbaHome\bin\jabba.exe' @cmdArgs --fd3 `$fd3 }
     `$fd3content=`$(Get-Content `$fd3)
     if (`$fd3content) {
         `$expression=`$fd3content.replace("export ","```$env:").replace("unset ","Remove-Item env:") -join "``n"
