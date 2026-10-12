@@ -120,11 +120,22 @@ $env:JABBA_HOME = "%s"
 
 function jabba {
     $fd3 = [IO.Path]::GetTempFileName()
-    & $env:JABBA_HOME\bin\jabba.exe $args --fd3 $fd3 | Out-Null
+    # Do NOT pipe to Out-Null — that would suppress stdout output from
+    # query commands like 'jabba current', 'jabba ls', etc.
+    & $env:JABBA_HOME\bin\jabba.exe $args --fd3 $fd3
     $exitCode = $LASTEXITCODE
     if (Test-Path $fd3) {
         $cmd = Get-Content $fd3 | Out-String
         if ($cmd) {
+            # jabba.exe writes bash-style shell commands to fd3:
+            #   export PATH="..."
+            #   export JAVA_HOME="..."
+            #   unset JAVA_HOME_BEFORE_JABBA
+            # Convert them to PowerShell equivalents before executing.
+            #   export VAR="value"  ->  $env:VAR = "value"
+            #   unset VAR           ->  Remove-Item Env:VAR
+            $cmd = [regex]::Replace($cmd, 'export\s+(\w+)="([^"]*)"', '$$env:$1 = "$2"')
+            $cmd = [regex]::Replace($cmd, 'unset\s+(\w+)', 'Remove-Item Env:$1 -ErrorAction SilentlyContinue')
             Invoke-Expression $cmd
         }
         Remove-Item $fd3
